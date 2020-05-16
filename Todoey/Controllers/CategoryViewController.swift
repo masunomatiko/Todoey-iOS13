@@ -7,14 +7,15 @@
 //
 
 import Foundation
-import UIKit
 
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
+        print(categoryArray)
+//        tableView.rowHeight = 80.0
     }
     
     let realm = try! Realm()
@@ -26,11 +27,70 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No categories added"
         
         return cell
+    }
+
+    func loadCategories() {
+        
+        categoryArray = realm.objects(Category.self)
+        tableView.reloadData()
+    }
+    
+    func save(category: Category) {
+        do {
+            try realm.write {
+                realm.add(category)
+            }
+        } catch {
+            print(error)
+        }
+        tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+
+        if let categoryForDeletion = self.categoryArray?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryForDeletion)
+                }
+            } catch {
+                print(error)
+            }
+        }
+        
+    }
+
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Todoey category", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "AddItem", style: .default) { (action) in
+            let newCategory = Category()
+            newCategory.name = textField.text!
+            
+            self.save(category: newCategory)
+            
+        }
+        alert.addAction(action)
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new category"
+            textField = alertTextField
+        }
+
+        present(alert, animated: true, completion: nil)
+        
+        
+//        MARK: - Tableview Detasource Methods
+        
+//        MARK: - Tableview Delegate Methods
+        
+//        MARK: - Tableview Data Manipulation Methods
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -46,55 +106,6 @@ class CategoryViewController: UITableViewController {
                 todoVC.selectedCategory = categoryArray?[indexPath.row]
             }
         }
-    }
-    
-
-    
-    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        var textField = UITextField()
-        
-        let alert = UIAlertController(title: "Add New Todoey category", message: "", preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: "AddItem", style: .default) { (action) in
-            let newCategory = Category()
-            newCategory.name = textField.text!
-            
-            self.save(category: newCategory)
-            
-        }
-        
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Create new category"
-            textField = alertTextField
-        }
-        
-        alert.addAction(action)
-        present(alert, animated: true, completion: nil) 
-        
-        
-//        MARK: - Tableview Detasource Methods
-        
-//        MARK: - Tableview Delegate Methods
-        
-//        MARK: - Tableview Data Manipulation Methods
-    }
-    
-    func loadCategories() {
-        
-        categoryArray = realm.objects(Category.self)
-        
-        tableView.reloadData()
-    }
-    
-    func save(category: Category) {
-        do {
-            try realm.write {
-                realm.add(category)
-            }
-        } catch {
-            print(error)
-        }
-        tableView.reloadData()
     }
 }
 
