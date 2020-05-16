@@ -14,8 +14,6 @@ class CategoryViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
-        print(categoryArray)
-//        tableView.rowHeight = 80.0
     }
     
     let realm = try! Realm()
@@ -36,6 +34,7 @@ class CategoryViewController: SwipeTableViewController {
     func loadCategories() {
         
         categoryArray = realm.objects(Category.self)
+        print(categoryArray)
         tableView.reloadData()
     }
     
@@ -47,7 +46,9 @@ class CategoryViewController: SwipeTableViewController {
         } catch {
             print(error)
         }
-        tableView.reloadData()
+        DispatchQueue.main.async{
+            self.tableView.reloadData()
+        }
     }
     
     override func updateModel(at indexPath: IndexPath) {

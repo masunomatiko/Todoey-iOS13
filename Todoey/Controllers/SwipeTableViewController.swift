@@ -19,6 +19,7 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        tableView.rowHeight = 80.0
     }
 
     // MARK: - Table view data source
